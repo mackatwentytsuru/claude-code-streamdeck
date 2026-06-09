@@ -1,0 +1,15 @@
+{
+  "name": "macka-streamdeck",
+  "owner": {
+    "name": "macka"
+  },
+  "plugins": [
+    {
+      "name": "streamdeck-launcher",
+      "source": "./",
+      "description": "Fully automated Stream Deck Plus button creation for launching Claude Code in any folder on Windows 11.",
+      "category": "automation",
+      "version": "0.1.0"
+    }
+  ]
+}

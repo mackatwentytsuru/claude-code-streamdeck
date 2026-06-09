@@ -1,0 +1,17 @@
+{
+  "name": "streamdeck-launcher",
+  "version": "0.1.0",
+  "description": "Fully automated Stream Deck Plus button creation for launching Claude Code in any folder on Windows 11.",
+  "author": {
+    "name": "macka"
+  },
+  "homepage": "https://github.com/mackatwentytsuru/claude-code-streamdeck",
+  "license": "MIT",
+  "keywords": [
+    "streamdeck",
+    "elgato",
+    "claude-code",
+    "windows",
+    "automation"
+  ]
+}
