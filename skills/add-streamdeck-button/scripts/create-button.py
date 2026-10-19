@@ -7,7 +7,7 @@ at the next free slot (or a user-specified position).
 Usage:
     python create-button.py \
         --label "DaVinci" \
-        --folder "C:\\Users\\macka\\Desktop\\DaVinci Resolve" \
+        --folder "C:\\projects\\my-app" \
         --color "#fbbf24" \
         --command continue
 """
