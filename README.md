@@ -243,3 +243,11 @@ python -m pytest tests
 ### ライセンス
 
 MIT です。[LICENSE](LICENSE) を見てください。
+
+---
+
+### Author / 作者
+
+Made by Yuki Tsuruoka — stage visuals and live show production, building tools with Claude Code. Web: [otolume.com](https://otolume.com) (OTOLUME, a stage LED visual service) / Instagram: [@tsuru614](https://www.instagram.com/tsuru614/) / YouTube: [channel](https://www.youtube.com/channel/UCYngpwyo7vGBIXBtKhh7z1g)
+
+作者: Yuki Tsuruoka(ステージ映像・ライブ演出。道具は Claude Code で作っています)Web: [otolume.com](https://otolume.com)(OTOLUME、ステージ LED 映像のサービス) / Instagram: [@tsuru614](https://www.instagram.com/tsuru614/) / YouTube: [channel](https://www.youtube.com/channel/UCYngpwyo7vGBIXBtKhh7z1g)
