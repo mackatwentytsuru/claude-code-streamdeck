@@ -21,8 +21,9 @@ If not specified, ask in ONE round:
 - **command** (`continue` / `new` / `resume` / `prompt`) - default `continue`
 - **color** (hex like `#fbbf24`) - default `#ffffff`, suggest a fitting color
 - **prompt** (only if command=prompt) - the text to pass to `claude -p`
+- **skip-permissions** - OPT-IN, default **off**. Only when the user explicitly asks for a button that runs without confirmations (for example "no confirmations", "skip permissions", "dangerously"), add `--skip-permissions`. That makes the button start Claude Code with `--dangerously-skip-permissions`, so Claude can run commands and edit files in the folder without asking first. NEVER turn it on by yourself, never suggest it as a default, and tell the user in one sentence what it means when you do add it.
 
-Do NOT ask about: position (auto-detect free slot), title (auto-generate from label+command), page (always the currently active page).
+Do NOT ask about: position (auto-detect free slot), title (auto-generate from label+command), page (always the currently active page). Do not ask about skip-permissions unless the user brought it up.
 
 ## Constraints (CRITICAL)
 
@@ -49,7 +50,7 @@ python "${CLAUDE_PLUGIN_ROOT}/skills/add-streamdeck-button/scripts/create-button
 
 Capture the JSON output to know the worker_bat / vbs / position created.
 
-For `--command prompt`, also pass `--prompt "<PROMPT_TEXT>"`.
+For `--command prompt`, also pass `--prompt "<PROMPT_TEXT>"`. Only if the user explicitly asked for it, also pass `--skip-permissions` (see Inputs). Note that `prompt` is non-interactive: without `--skip-permissions`, any tool that needs approval is refused because nobody can answer the question.
 
 ### Step 2: Restart Stream Deck automatically
 

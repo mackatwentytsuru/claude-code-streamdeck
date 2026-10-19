@@ -86,7 +86,22 @@ def safe_filename(label: str) -> str:
     return slug or "button"
 
 
-def build_worker_bat_lines(folder: str, command: str, prompt: str | None) -> list[str]:
+SKIP_PERMISSIONS_FLAG = " --dangerously-skip-permissions"
+
+
+def build_worker_bat_lines(
+    folder: str,
+    command: str,
+    prompt: str | None,
+    skip_permissions: bool = False,
+) -> list[str]:
+    """Build the lines of the worker .bat.
+
+    By default Claude Code is started normally, so it asks before it runs
+    commands or edits files. Pass skip_permissions=True (opt-in) to add
+    --dangerously-skip-permissions, which removes those confirmations.
+    """
+    flag = SKIP_PERMISSIONS_FLAG if skip_permissions else ""
     n = "nul"
     lines = [
         "@echo off",
@@ -94,11 +109,11 @@ def build_worker_bat_lines(folder: str, command: str, prompt: str | None) -> lis
         f'cd /d "{folder}"',
     ]
     if command == "continue":
-        lines.append("claude --continue --dangerously-skip-permissions")
+        lines.append(f"claude --continue{flag}")
     elif command == "new":
-        lines.append("claude --dangerously-skip-permissions")
+        lines.append(f"claude{flag}")
     elif command == "resume":
-        lines.append("claude --resume --dangerously-skip-permissions")
+        lines.append(f"claude --resume{flag}")
     elif command == "prompt":
         if not prompt:
             raise ValueError("--prompt is required when --command=prompt")
@@ -106,7 +121,7 @@ def build_worker_bat_lines(folder: str, command: str, prompt: str | None) -> lis
         prompt_file.parent.mkdir(parents=True, exist_ok=True)
         prompt_file.write_text(prompt, encoding="utf-8")
         lines.append(f'set /p PROMPT=<"{prompt_file}"')
-        lines.append('claude -p "%PROMPT%" --dangerously-skip-permissions')
+        lines.append(f'claude -p "%PROMPT%"{flag}')
         lines.append("pause")
     else:
         raise ValueError(f"Unknown command: {command}")
@@ -172,6 +187,12 @@ def main() -> int:
         "--command", default="continue", choices=["continue", "new", "resume", "prompt"]
     )
     parser.add_argument("--prompt", default=None)
+    parser.add_argument(
+        "--skip-permissions",
+        action="store_true",
+        help="OPT-IN, off by default: start Claude Code with --dangerously-skip-permissions "
+        "so it runs commands and edits files without asking first.",
+    )
     parser.add_argument("--position", default=None)
     parser.add_argument("--title", default=None)
     args = parser.parse_args()
@@ -183,7 +204,9 @@ def main() -> int:
     worker_bat = SCRIPTS_DIR / f"claude-{slug}-worker.bat"
     vbs_path = SCRIPTS_DIR / f"claude-{slug}.vbs"
 
-    bat_lines = build_worker_bat_lines(args.folder, args.command, args.prompt)
+    bat_lines = build_worker_bat_lines(
+        args.folder, args.command, args.prompt, skip_permissions=args.skip_permissions
+    )
     write_bat_crlf(worker_bat, bat_lines)
     write_vbs(vbs_path, build_vbs(worker_bat))
 
@@ -212,6 +235,7 @@ def main() -> int:
         "position": position,
         "title": title,
         "color": args.color,
+        "skip_permissions": args.skip_permissions,
     }
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0

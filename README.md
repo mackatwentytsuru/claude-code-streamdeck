@@ -65,16 +65,22 @@ Claude asks only for what is missing (folder, label, color, command type), picks
 
 ### Command types
 
-| Command | What the button runs |
-|---------|----------------------|
-| `continue` (default) | `claude --continue --dangerously-skip-permissions` |
-| `new` | `claude --dangerously-skip-permissions` |
-| `resume` | `claude --resume --dangerously-skip-permissions` |
-| `prompt` | `claude -p "<your prompt>" --dangerously-skip-permissions` (non-interactive) |
+| Command | What the button runs (default) | With the opt-in `--skip-permissions` |
+|---------|--------------------------------|--------------------------------------|
+| `continue` (default) | `claude --continue` | `claude --continue --dangerously-skip-permissions` |
+| `new` | `claude` | `claude --dangerously-skip-permissions` |
+| `resume` | `claude --resume` | `claude --resume --dangerously-skip-permissions` |
+| `prompt` | `claude -p "<your prompt>"` (non-interactive) | `claude -p "<your prompt>" --dangerously-skip-permissions` |
 
-### Security note: permission prompts are skipped
+### Safe by default: Claude asks before it acts
 
-Every generated button starts Claude Code with `--dangerously-skip-permissions`. Claude can then run commands and edit files in that folder without asking you first. Use it only on folders and projects you trust. If you want the normal permission prompts, remove that flag from the generated `claude-<label>-worker.bat` (or from `build_worker_bat_lines` in `skills/add-streamdeck-button/scripts/create-button.py`).
+By default a button starts Claude Code normally. Claude asks you before it runs a command or edits a file, as it does when you start it by hand. Note that `prompt` buttons are non-interactive: nobody is there to answer, so any tool that needs approval is refused unless you use the opt-in below.
+
+### Opt-in: skip the confirmations (risky)
+
+If you want a button that never asks, say so when you ask for it ("... and skip the permission prompts"), or pass `--skip-permissions` to `create-button.py`. The worker `.bat` then starts Claude Code with `--dangerously-skip-permissions`.
+
+What that means: Claude can run any command and change or delete any file the folder and your account allow, without asking you first. A mistake, or a malicious instruction hidden in a file or web page that Claude reads, can do real damage. Use it only on folders and projects you trust, ideally with a backup or version control. It is chosen per button; it is never turned on automatically. To switch a button back, delete ` --dangerously-skip-permissions` from its `claude-<label>-worker.bat`, or create the button again without the option.
 
 ### What gets created
 
@@ -103,6 +109,15 @@ Why a `.vbs`? The Stream Deck `Open` action goes through `ShellExecute`. On Wind
 - It edits the Stream Deck profile `manifest.json` in place and does not make a backup. Back up `%APPDATA%\Elgato\StreamDeck\ProfilesV3` first if you care about your layout.
 - It restarts the Stream Deck app. If the app does not close politely, the script force-kills it, so save anything open in the Stream Deck app first.
 - It only works on the profile page that is currently active.
+
+### Tests
+
+```bash
+python -m pip install pytest
+python -m pytest tests
+```
+
+The tests only call the pure functions and `--help`. They write to a temporary folder, never to your Stream Deck profile or `StreamDeckScripts` folder.
 
 ### License
 
@@ -171,16 +186,22 @@ Add a Stream Deck button that opens Claude Code in C:\projects\my-app
 
 ### 種類(command)
 
-| command | ボタンで動くもの |
-|---------|------------------|
-| `continue`(初期値) | `claude --continue --dangerously-skip-permissions` |
-| `new` | `claude --dangerously-skip-permissions` |
-| `resume` | `claude --resume --dangerously-skip-permissions` |
-| `prompt` | `claude -p "<指示>" --dangerously-skip-permissions`(対話なし) |
+| command | ボタンで動くもの(初期値) | 選んだとき(`--skip-permissions`) |
+|---------|--------------------------|-------------------------------------|
+| `continue`(初期値) | `claude --continue` | `claude --continue --dangerously-skip-permissions` |
+| `new` | `claude` | `claude --dangerously-skip-permissions` |
+| `resume` | `claude --resume` | `claude --resume --dangerously-skip-permissions` |
+| `prompt` | `claude -p "<指示>"`(対話なし) | `claude -p "<指示>" --dangerously-skip-permissions` |
 
-### 安全についての注意: 確認なしで動きます
+### 初期値は安全: 実行の前に Claude が確認します
 
-作られるボタンは、すべて `--dangerously-skip-permissions` を付けて Claude Code を起動します。つまり、そのフォルダの中で、Claude が確認なしにコマンドを動かし、ファイルを書き換えます。信頼できるフォルダ・プロジェクトにだけ使ってください。ふつうの確認を出したいときは、作られた `claude-<名前>-worker.bat`(または `skills/add-streamdeck-button/scripts/create-button.py` の `build_worker_bat_lines`)から、この印を消してください。
+ボタンは、ふつうに Claude Code を起動します。コマンドを動かすときやファイルを書き換えるときは、自分で起動したときと同じように、Claude が先に確認します。ただし `prompt` のボタンは対話なしで動くので、答える人がおらず、確認が要る道具は断られます(下の「選ぶ設定」を使わない限り)。
+
+### 選ぶ設定: 確認を飛ばす(危険があります)
+
+確認なしで動くボタンが欲しいときは、お願いするときに「確認を飛ばして」と伝えるか、`create-button.py` に `--skip-permissions` を付けます。すると作業用の `.bat` が `--dangerously-skip-permissions` 付きで Claude Code を起動します。
+
+意味: そのフォルダとあなたのアカウントが許す範囲で、Claude が、確認なしに、どんなコマンドでも動かし、どんなファイルでも書き換えたり消したりできます。間違いや、Claude が読むファイル・Web ページに隠された悪意のある指示で、本当に被害が出ることがあります。信頼できるフォルダ・プロジェクトにだけ、できればバックアップやバージョン管理のある状態で使ってください。ボタンごとに選ぶ設定で、自動では決して有効になりません。戻すには、`claude-<名前>-worker.bat` の ` --dangerously-skip-permissions` を消すか、オプションなしでボタンを作り直します。
 
 ### 作られるもの
 
@@ -209,6 +230,15 @@ Add a Stream Deck button that opens Claude Code in C:\projects\my-app
 - Stream Deck のプロファイル `manifest.json` を直接書き換え、バックアップは作りません。配置が大事なら、先に `%APPDATA%\Elgato\StreamDeck\ProfilesV3` を写しておいてください。
 - Stream Deck アプリを再起動します。静かに閉じないときは強制終了するので、アプリで作業中のものは先に保存してください。
 - いま開いているページにだけ作用します。
+
+### テスト
+
+```bash
+python -m pip install pytest
+python -m pytest tests
+```
+
+テストが呼ぶのは、中の関数と `--help` だけです。書き込み先は一時フォルダで、Stream Deck のプロファイルや `StreamDeckScripts` フォルダには決して書き込みません。
 
 ### ライセンス
 
